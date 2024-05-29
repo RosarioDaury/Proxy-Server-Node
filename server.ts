@@ -1,14 +1,18 @@
 import express from 'express';
 import Logger from './src/utils/logger';
 import 'dotenv/config';
+
 import ProfixConfigRouter from './src/routes/proxyConfigRoutes';
 import ProxyRoutes from './src/routes/proxyRoutes';
+import AuthRoutes from './src/routes/authRoutes';
+
 import bodyParser from 'body-parser';
 
 const server: express.Application = express();
 
 server.use(bodyParser.json())
 server.use('/config', ProfixConfigRouter);
+server.use('/auth', AuthRoutes);
 server.use(ProxyRoutes);
 
 server.listen(Number(process.env.PORT), String(process.env.HOST), () => {

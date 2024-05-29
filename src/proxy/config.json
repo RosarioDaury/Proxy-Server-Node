@@ -1,1 +1,6 @@
-[]
+[
+  {
+    "subdomain": "graph",
+    "route": "localhost:3001"
+  }
+]

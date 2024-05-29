@@ -8,8 +8,14 @@ interface ResponseProxyMethod {
     contentType: string
 }
 
+interface ICached {
+    url: string,
+    response: any
+}
+
 class ProxyClass {
     proxyConfiguration: Iservice[] | null = null;
+    cached: Array<ICached> = [];
 
     constructor() {
         this.setUp();
@@ -64,14 +70,45 @@ class ProxyClass {
 
     private GET = async (url: string, headers: Record<string, any>): Promise<ResponseProxyMethod> => {
         try {
+            //* WHEN RESPONSES ARE CACHED
+            let cached: ICached | null = this.cachingGet(url);
+            if(cached) return {response: cached.response, contentType: ''}
+
+            //* WHEN RESPONSES ARE NOT CACHED
             let response: any = await fetch(url, { method: 'GET'});
             const contentType = response.headers.get('content-type');
             response = await response.text();
-            
+            // CATCH DATA
+            this.cachingSave(url, response);
+    
             return {response, contentType}
         } catch(err) {
             Logger.error(err);
             return {response: {}, contentType: ''};
+        }
+    }
+
+    private cachingSave = async (url: string, response: any): Promise<void> => {
+        try {
+            Logger.info('SAVING RESPONSES TO CACHE');
+            const existing = this.cached.filter(el => el.url == url);
+            if(existing.length == 0) {
+                this.cached.push({url, response});
+            }
+        } catch(err) {
+            Logger.error(err);
+        }
+    }
+
+    private cachingGet = (url: string): ICached | null => {
+        try {
+            Logger.info('GETTING RESPONSE FROM CACHED')
+            const existing: ICached | null = this.cached.filter(el => el.url == url)[0];
+            if(existing) return existing;
+            return null;
+        } catch(err) {
+            Logger.error(err);
+            return null;
         }
     }
 

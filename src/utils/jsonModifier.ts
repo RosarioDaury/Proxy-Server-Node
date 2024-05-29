@@ -13,6 +13,17 @@ export const readJson = async (): Promise<Iservice[] | null> => {
     }
 }
 
+export const readJsonUsers = async () => {
+    try {
+        const json: string = readFileSync(String(process.env.PROXY_CONFIG_AUTH_ROUTE), 'utf-8');
+        const result: Array<{username: string, password: string}> = JSON.parse(json);
+        return result;
+    } catch(err) {
+        Logger.error(err);
+        return null
+    }
+}
+
 export const writeJson = async (object: Iservice): Promise<void> => {
     try {
         let json = await readJson();
